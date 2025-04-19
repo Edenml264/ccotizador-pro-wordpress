@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plantilla de Cotización</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; padding: 0; color: #333;}
+        .cotizacion-container { max-width: 700px; margin: 30px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 30px; }
+        h2 { text-align: center; color: #2ECC71; }
+        .datos-cliente, .datos-empresa { margin-bottom: 30px; }
+        .datos-cliente h3, .datos-empresa h3 { color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 15px; }
+        .datos-cliente p, .datos-empresa p { margin: 4px 0; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th, td { border: 1px solid #eee; padding: 10px; text-align: left; }
+        th { background: #f0f4f8; }
+        .total { text-align: right; font-size: 1.2em; font-weight: bold; color: #2ECC71; }
+        .footer { text-align: center; color: #888; font-size: 0.95em; margin-top: 30px; }
+    </style>
+
+    <style>
+        .cabecera-cotizacion {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 35px;
+        }
+        .logo-empresa {
+            flex: 0 0 auto;
+        }
+        .titulo-cotizacion {
+            flex: 1 1 auto;
+            text-align: center;
+        }
+        .info-empresa {
+            flex: 0 0 auto;
+            text-align: right;
+            font-size: 0.96em;
+            color: #444;
+        }
+        .info-empresa p { margin: 4px 0; }
+
+        @media (max-width: 600px) {
+            .cabecera-cotizacion {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+            }
+            .titulo-cotizacion {
+                text-align: left;
+                margin: 10px 0;
+            }
+            .info-empresa {
+                text-align: left;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cotizacion-container">
+        <div class="cabecera-cotizacion">
+            <div class="logo-empresa">
+                <img src="https://edenmendez.com/wp-content/uploads/2024/10/Eden-Mendez_preview_rev_2.png" alt="Logo de la empresa" style="height:60px;">
+            </div>
+            <div class="titulo-cotizacion">
+                <h2>Cotización</h2>
+            </div>
+            <div class="info-empresa">
+                <p>ventas@edenmendez.com</p>
+                <p>624-166-5588</p>
+                <p>Country del Mar, San Jose del Cabo, <br> Baja California Sur, México</p>
+            </div>
+        </div>
+
+        <div class="datos-cliente">
+            <h3>Datos del Cliente</h3>
+            <p><strong>Nombre:</strong> <span id="nombreCliente"></span></p>
+            <p><strong>Correo electrónico:</strong> <span id="correoCliente"></span></p>
+            <p><strong>Teléfono:</strong> <span id="telefonoCliente"></span></p>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Concepto</th>
+                    <th>Detalle</th>
+                    <th>Precio</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Tipo de Sitio Web</td>
+                    <td id="tipoSitio"></td>
+                    <td id="precioTipoSitio"></td>
+                </tr>
+                <tr>
+                    <td>Número de páginas</td>
+                    <td id="numPaginas"></td>
+                    <td id="precioPaginas"></td>
+                </tr>
+                <tr>
+                    <td>Diseño personalizado</td>
+                    <td id="diseno"></td>
+                    <td id="precioDiseno"></td>
+                </tr>
+                <tr>
+                    <td>Integración con pagos en línea</td>
+                    <td id="pagos"></td>
+                    <td id="precioPagos"></td>
+                </tr>
+                <tr>
+                    <td>Optimización SEO</td>
+                    <td id="seo"></td>
+                    <td id="precioSeo"></td>
+                </tr>
+                <tr>
+                    <td>Mantenimiento mensual</td>
+                    <td id="mantenimiento"></td>
+                    <td id="precioMantenimiento"></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="total">
+            Total: <span id="totalCotizacion"></span>
+        </div>
+        <div style="text-align:right; margin-top:20px; margin-bottom:20px;">
+            <button onclick="window.print()" style="padding:8px 18px; background:#2ECC71; color:white; border:none; border-radius:5px; font-size:15px; cursor:pointer;">Imprimir</button>
+        </div>
+        <div class="footer">
+            <p>Gracias por confiar en nuestros servicios. La cotización es válida por 15 días.<br>Términos y Condiciones: <br> 
+                El proyecto comienza con un anticipo del 70% y el saldo se paga antes de la entrega final. Los tiempos de entrega dependen de la entrega puntual de materiales por parte del cliente. Se incluyen dos rondas de revisiones; adicionales se facturarán por separado. El cliente es responsable de cubrir los costos de licencias de terceros. 
+                Toda la información proporcionada será tratada de manera confidencial. 
+                El soporte y mantenimiento no están incluidos, pero pueden contratarse por separado. 
+                Las cancelaciones a mitad del proyecto retendrán el anticipo como compensación.</p>
+        </div>
+    </div>
+    <script>
+    // Si hay datos en sessionStorage, usarlos para llenar la plantilla
+    let datos = null;
+    if (sessionStorage.getItem('datosCotizacion')) {
+        datos = JSON.parse(sessionStorage.getItem('datosCotizacion'));
+        // Adaptar los nombres de las propiedades si es necesario
+        document.getElementById('nombreCliente').textContent = datos.nombre;
+        document.getElementById('correoCliente').textContent = datos.correo;
+        document.getElementById('telefonoCliente').textContent = datos.telefono;
+        document.getElementById('tipoSitio').textContent = datos.tipoSitio;
+           // Mostrar el precio de tipo de sitio web si está disponible
+           if (datos.precioTipoSitio && !isNaN(parseInt(datos.precioTipoSitio))) {
+               document.getElementById('precioTipoSitio').textContent = `$${parseInt(datos.precioTipoSitio).toLocaleString()} MXN`;
+           } else if (datos.tipoSitio && datos.tipoSitio.toLowerCase().includes('básico')) {
+               document.getElementById('precioTipoSitio').textContent = '$3,000 MXN';
+           } else if (datos.tipoSitio && datos.tipoSitio.toLowerCase().includes('corporativo')) {
+               document.getElementById('precioTipoSitio').textContent = '$7,000 MXN';
+           } else if (datos.tipoSitio && datos.tipoSitio.toLowerCase().includes('tienda')) {
+               document.getElementById('precioTipoSitio').textContent = '$15,000 MXN';
+           } else if (datos.tipoSitio && datos.tipoSitio.toLowerCase().includes('blog')) {
+               document.getElementById('precioTipoSitio').textContent = '$10,000 MXN';
+           } else {
+               document.getElementById('precioTipoSitio').textContent = '';
+           }
+        document.getElementById('numPaginas').textContent = datos.numPaginas;
+        // Calcular precioPaginas
+        let precioPaginas = (parseInt(datos.numPaginas) - 3) * 500;
+        document.getElementById('precioPaginas').textContent = precioPaginas > 0 ? `$${precioPaginas.toLocaleString()} MXN` : '$0 MXN';
+        document.getElementById('diseno').textContent = datos.diseno;
+        document.getElementById('precioDiseno').textContent = datos.diseno.includes('Sí') ? '$3,000 MXN' : '$0 MXN';
+        document.getElementById('pagos').textContent = datos.pagos;
+        document.getElementById('precioPagos').textContent = datos.pagos.includes('Sí') ? '$5,000 MXN' : '$0 MXN';
+        document.getElementById('seo').textContent = datos.seo;
+        document.getElementById('precioSeo').textContent = datos.seo.includes('Sí') ? '$2,000 MXN' : '$0 MXN';
+        document.getElementById('mantenimiento').textContent = datos.mantenimiento;
+        document.getElementById('precioMantenimiento').textContent = datos.mantenimiento.includes('Sí') ? '$1,000 MXN' : '$0 MXN';
+        document.getElementById('totalCotizacion').textContent = datos.total;
+    } else {
+        // Si no hay datos, puedes mostrar un mensaje o dejar los campos vacíos
+    }
+
+    </script>
+
+</body>
+</html>

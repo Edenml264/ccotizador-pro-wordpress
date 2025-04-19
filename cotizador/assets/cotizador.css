@@ -1,0 +1,76 @@
+#cotizador-app {
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 32px 24px 24px 24px;
+  border: 1px solid #ddd;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+#cotizador-app label {
+  display: block;
+  margin-top: 18px;
+  font-weight: 500;
+}
+#cotizador-app input#clientName,
+#cotizador-app input#clientEmail,
+#cotizador-app input#clientPhone,
+#cotizador-app input#numPages,
+#cotizador-app select#siteType,
+#cotizador-app select#design,
+#cotizador-app select#payments,
+#cotizador-app select#seo,
+#cotizador-app select#maintenance {
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 6px;
+  border: 1px solid #d4d4d4;
+  border-radius: 6px;
+  font-size: 1em;
+  transition: border-color 0.2s;
+}
+
+/* Placeholders más oscuros cross-browser */
+#cotizador-app input::placeholder {
+  color: #444 !important;
+  opacity: 1;
+}
+#cotizador-app input::-webkit-input-placeholder { color: #444 !important; }
+#cotizador-app input::-moz-placeholder { color: #444 !important; }
+#cotizador-app input:-ms-input-placeholder { color: #444 !important; }
+#cotizador-app input::-ms-input-placeholder { color: #444 !important; }
+
+#cotizador-app input:focus,
+#cotizador-app select:focus {
+  outline: none;
+}
+#cotizador-app h3 {
+  margin-top: 28px;
+  text-align: right;
+  font-size: 1.3em;
+}
+#cotizador-app button {
+  margin-top: 28px;
+  width: 100%;
+  padding: 12px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+}
+#cotizador-mensaje {
+  margin-top: 22px;
+  font-size: 1.05em;
+  text-align: center;
+  color: #28a745;
+  font-weight: 500;
+}
+@media (max-width: 600px) {
+  #cotizador-app {
+    padding: 18px 6px 16px 6px;
+  }
+  #cotizador-app h3 {
+    font-size: 1.1em;
+  }
+}

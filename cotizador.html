@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotizador Web</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .cotizador { max-width: 400px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }
+        label { display: block; margin: 10px 0 5px; }
+        select, input { width: 100%; padding: 8px; margin-bottom: 10px; }
+        #total { font-size: 20px; font-weight: bold; color: #007bff; }
+    </style>
+</head>
+<body data-rsssl=1>
+    <div class="cotizador">
+
+        <!-- Información del Cliente -->
+        <label for="nombreCliente">Nombre completo del cliente:</label>
+        <input type="text" id="nombreCliente" name="nombreCliente" placeholder="Nombre completo" required>
+
+        <label for="correoCliente">Correo electrónico:</label>
+        <input type="email" id="correoCliente" name="correoCliente" placeholder="ejemplo@correo.com" required>
+
+        <label for="telefonoCliente">Teléfono:</label>
+        <input type="tel" id="telefonoCliente" name="telefonoCliente" placeholder="(10 dígitos)" pattern="[0-9]{10}" required>
+
+        <label>Tipo de Sitio Web:</label>
+        <select id="tipoSitio">
+            <option value="3000">Sitio Básico (One Page)</option>
+            <option value="7000">Sitio Corporativo (3-5 páginas)</option>
+            <option value="15000">Tienda en Línea</option>
+            <option value="10000">Blog o Revista Digital</option>
+        </select>
+
+        <label>Número de páginas:</label>
+        <input type="number" id="numPaginas" value="3" min="1">
+
+        <label>¿Requiere diseño personalizado?</label>
+        <select id="diseno">
+            <option value="0">No</option>
+            <option value="3000">Sí</option>
+        </select>
+
+        <label>¿Integración con pagos en línea?</label>
+        <select id="pagos">
+            <option value="0">No</option>
+            <option value="5000">Sí</option>
+        </select>
+
+        <label>¿Optimización SEO?</label>
+        <select id="seo">
+            <option value="0">No</option>
+            <option value="2000">Sí</option>
+        </select>
+
+        <label>¿Mantenimiento mensual?</label>
+        <select id="mantenimiento">
+            <option value="0">No</option>
+            <option value="1000">Sí</option>
+        </select>
+
+        <h3>Total Estimado: <span id="total">$0 MXN</span></h3>
+        <button id="enviarCotizacion" style="width:100%;padding:10px 0;background:#007bff;color:white;border:none;border-radius:5px;font-size:16px;cursor:pointer;">Enviar cotización</button>
+    </div>
+
+    <script>
+        function calcularCotizacion() {
+            let tipoSitio = parseInt(document.getElementById("tipoSitio").value);
+            let numPaginas = parseInt(document.getElementById("numPaginas").value);
+            let diseno = parseInt(document.getElementById("diseno").value);
+            let pagos = parseInt(document.getElementById("pagos").value);
+            let seo = parseInt(document.getElementById("seo").value);
+            let mantenimiento = parseInt(document.getElementById("mantenimiento").value);
+
+            let costoPaginas = (numPaginas - 3) * 500;
+            let total = tipoSitio + diseno + pagos + seo + mantenimiento + (costoPaginas > 0 ? costoPaginas : 0);
+
+            document.getElementById("total").textContent = `$${total.toLocaleString()} MXN`;
+        }
+
+        document.querySelectorAll("select, input").forEach(elemento => {
+            elemento.addEventListener("change", calcularCotizacion);
+        });
+
+        calcularCotizacion();
+
+        // Enviar cotización por correo y PDF
+        document.getElementById('enviarCotizacion').addEventListener('click', function(e) {
+            e.preventDefault();
+            const btn = this;
+            btn.disabled = true;
+            btn.textContent = 'Enviando...';
+
+            // Recolectar datos del formulario
+            const data = {
+                nombre: document.getElementById('nombreCliente').value,
+                correo: document.getElementById('correoCliente').value,
+                telefono: document.getElementById('telefonoCliente').value,
+                tipoSitio: document.getElementById('tipoSitio').options[document.getElementById('tipoSitio').selectedIndex].text,
+                numPaginas: document.getElementById('numPaginas').value,
+                diseno: document.getElementById('diseno').options[document.getElementById('diseno').selectedIndex].text,
+                pagos: document.getElementById('pagos').options[document.getElementById('pagos').selectedIndex].text,
+                seo: document.getElementById('seo').options[document.getElementById('seo').selectedIndex].text,
+                mantenimiento: document.getElementById('mantenimiento').options[document.getElementById('mantenimiento').selectedIndex].text,
+                total: document.getElementById('total').textContent
+            };
+
+            // Generar HTML tipo plantilla-cotizacion.html
+            let cotizacionHTML = `
+            <div style='font-family: Arial, sans-serif; background: #fff; max-width: 700px; margin: auto; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 30px;'>
+                <div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:35px;'>
+                    <div><img src='https://edenmendez.com/wp-content/uploads/2024/10/Eden-Mendez_preview_rev_2.png' alt='Logo' style='height:60px;'></div>
+                    <div style='flex:1;text-align:center;'><h2 style='color:#007bff;'>Cotización</h2></div>
+                    <div style='text-align:right;font-size:0.96em;color:#444;'>
+                        <p style='margin-bottom:0px'><strong>Empresa:</strong> EdenMendez.com</p>
+                        <p style='margin-bottom:0px'><strong>Correo:</strong> ventas@edenmendez.com</p>
+                        <p style='margin-bottom:0px'><strong>Teléfono:</strong> 624-166-5588</p>
+                        <p style='margin-bottom:0px'><strong>Dirección:</strong> Country del Mar, San Jose del Cabo, Baja California Sur, México</p>
+                    </div>
+                </div>
+                <div style='margin-bottom:30px;'><h3 style='color:#333;border-bottom:1px solid #eee;padding-bottom:5px;margin-bottom:15px;'>Datos del Cliente</h3>
+                    <p style='color:#333;margin-bottom:5px'><strong>Nombre:</strong> ${data.nombre}</p>
+                    <p style='color:#333;margin-bottom:5px'><strong>Correo electrónico:</strong> ${data.correo}</p>
+                    <p style='color:#333;margin-bottom:5px'><strong>Teléfono:</strong> ${data.telefono}</p>
+                </div>
+                <table style='width:100%;border-collapse:collapse;margin-bottom:30px;'>
+                    <thead>
+                        <tr><th style='color:#333;background:#f0f4f8;border:1px solid #eee;padding:10px;'>Concepto</th><th style='color:#333;background:#f0f4f8;border:1px solid #eee;padding:10px;'>Detalle</th><th style='color:#333;background:#f0f4f8;border:1px solid #eee;padding:10px;'>Precio</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td style='color:#333;border:1px solid #eee;padding:10px;'>Tipo de Sitio Web</td><td style='color:#333;border:1px solid #eee;padding:10px;'>${data.tipoSitio}</td><td style='color:#333;border:1px solid #eee;padding:10px;'>${document.getElementById('tipoSitio').value ? `$${parseInt(document.getElementById('tipoSitio').value).toLocaleString()} MXN` : ''}</td></tr>
+                        <tr><td style='color:#333;border:1px solid #eee;padding:10px;'>Número de páginas</td><td style='color:#333;border:1px solid #eee;padding:10px;'>${data.numPaginas}</td><td style='color:#333;border:1px solid #eee;padding:10px;'>${(parseInt(data.numPaginas) - 3) > 0 ? `$${((parseInt(data.numPaginas)-3)*500).toLocaleString()} MXN` : '$0 MXN'}</td></tr>
+                        <tr><td style='color:#333;border:1px solid #eee;padding:10px;'>Diseño personalizado</td><td style='color:#333;border:1px solid #eee;padding:10px;'>${data.diseno}</td><td style='color:#333;border:1px solid #eee;padding:10px;'>${data.diseno.includes('Sí') ? '$3,000 MXN' : '$0 MXN'}</td></tr>
+                        <tr><td style='color:#333;border:1px solid #eee;padding:10px;'>Pagos en línea</td><td style='color:#333;border:1px solid #eee;padding:10px;'>${data.pagos}</td><td style='color:#333;border:1px solid #eee;padding:10px;'>${data.pagos.includes('Sí') ? '$5,000 MXN' : '$0 MXN'}</td></tr>
+                        <tr><td style='color:#333;border:1px solid #eee;padding:10px;'>SEO</td><td style='color:#333;border:1px solid #eee;padding:10px;'>${data.seo}</td><td style='color:#333;border:1px solid #eee;padding:10px;'>${data.seo.includes('Sí') ? '$2,000 MXN' : '$0 MXN'}</td></tr>
+                        <tr><td style='color:#333;border:1px solid #eee;padding:10px;'>Mantenimiento</td><td style='color:#333;border:1px solid #eee;padding:10px;'>${data.mantenimiento}</td><td style='color:#333;border:1px solid #eee;padding:10px;'>${data.mantenimiento.includes('Sí') ? '$1,000 MXN' : '$0 MXN'}</td></tr>
+                    </tbody>
+                </table>
+                <div style='text-align:right;font-size:1.2em;font-weight:bold;color:#007bff;'>Total: ${data.total}</div>
+                <div style='text-align:center;color:#888;font-size:0.95em;margin-top:30px;'>Gracias por confiar en nuestros servicios.<br>Esta cotización es válida por 15 días.<br>EdenMendez.com</div>
+            </div>`;
+
+            // Cargar jsPDF y html2canvas dinámicamente si no existen
+            function loadScript(src) {
+                return new Promise((resolve, reject) => {
+                    if(document.querySelector(`script[src='${src}']`)) return resolve();
+                    const s = document.createElement('script');
+                    s.src = src;
+                    s.onload = resolve;
+                    s.onerror = reject;
+                    document.head.appendChild(s);
+                });
+            }
+            Promise.all([
+                loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'),
+                loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js')
+            ]).then(() => {
+                const jsPDF = window.jspdf.jsPDF;
+                // Crear div temporal oculto
+                const tempDiv = document.createElement('div');
+                tempDiv.style.position = 'fixed';
+                tempDiv.style.left = '-9999px';
+                tempDiv.innerHTML = cotizacionHTML;
+                document.body.appendChild(tempDiv);
+                window.html2canvas(tempDiv, {scale:2}).then(function(canvas) {
+                    const imgData = canvas.toDataURL('image/png');
+                    const pdf = new jsPDF('p', 'pt', 'a4');
+                    const pageWidth = pdf.internal.pageSize.getWidth();
+                    const pageHeight = pdf.internal.pageSize.getHeight();
+                    const imgProps = pdf.getImageProperties(imgData);
+                    let pdfWidth = pageWidth - 40;
+                    let pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                    if (pdfHeight > pageHeight - 40) {
+                        pdfHeight = pageHeight - 40;
+                        pdfWidth = (imgProps.width * pdfHeight) / imgProps.height;
+                    }
+                    pdf.addImage(imgData, 'PNG', 20, 20, pdfWidth, pdfHeight);
+                    const pdfBase64 = pdf.output('datauristring').split(',')[1];
+                    document.body.removeChild(tempDiv);
+                    // Enviar datos y PDF al endpoint
+                    const endpoint = 'https://edenmendez.com/wp-json/cotizador/v1/enviar';
+                    fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ...data, pdf: pdfBase64 })
+                    })
+                    .then(response => response.json())
+                    .then(res => {
+                        btn.disabled = false;
+                        btn.textContent = 'Enviar cotización';
+                        if(res.success) {
+                            sessionStorage.setItem('datosCotizacion', JSON.stringify(data));
+                            window.open('plantilla-cotizacion.html', '_blank');
+                            alert('Cotización enviada correctamente.');
+                        } else {
+                            alert('Hubo un problema al enviar la cotización.');
+                        }
+                    })
+                    .catch(() => {
+                        btn.disabled = false;
+                        btn.textContent = 'Enviar cotización';
+                        alert('Error de conexión al enviar la cotización.');
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

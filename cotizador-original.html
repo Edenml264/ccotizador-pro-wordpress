@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotizador Web</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .cotizador { max-width: 400px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }
+        label { display: block; margin: 10px 0 5px; }
+        select, input { width: 100%; padding: 8px; margin-bottom: 10px; }
+        #total { font-size: 20px; font-weight: bold; color: #007bff; }
+    </style>
+</head>
+<body data-rsssl=1>
+    <div class="cotizador">
+
+        <label>Tipo de Sitio Web:</label>
+        <select id="tipoSitio">
+            <option value="3000">Sitio Básico (One Page) - $3,000 MXN</option>
+            <option value="7000">Sitio Corporativo (3-5 páginas) - $7,000 MXN</option>
+            <option value="15000">Tienda en Línea - $15,000 MXN</option>
+            <option value="10000">Blog o Revista Digital - $10,000 MXN</option>
+        </select>
+
+        <label>Número de páginas:</label>
+        <input type="number" id="numPaginas" value="3" min="1">
+
+        <label>¿Requiere diseño personalizado?</label>
+        <select id="diseno">
+            <option value="0">No</option>
+            <option value="3000">Sí (+$3,000 MXN)</option>
+        </select>
+
+        <label>¿Integración con pagos en línea?</label>
+        <select id="pagos">
+            <option value="0">No</option>
+            <option value="5000">Sí (+$5,000 MXN)</option>
+        </select>
+
+        <label>¿Optimización SEO?</label>
+        <select id="seo">
+            <option value="0">No</option>
+            <option value="2000">Sí (+$2,000 MXN)</option>
+        </select>
+
+        <label>¿Mantenimiento mensual?</label>
+        <select id="mantenimiento">
+            <option value="0">No</option>
+            <option value="1000">Sí (+$1,000 MXN)</option>
+        </select>
+
+        <h3>Total Estimado: <span id="total">$0 MXN</span></h3>
+    </div>
+
+    <script>
+        function calcularCotizacion() {
+            let tipoSitio = parseInt(document.getElementById("tipoSitio").value);
+            let numPaginas = parseInt(document.getElementById("numPaginas").value);
+            let diseno = parseInt(document.getElementById("diseno").value);
+            let pagos = parseInt(document.getElementById("pagos").value);
+            let seo = parseInt(document.getElementById("seo").value);
+            let mantenimiento = parseInt(document.getElementById("mantenimiento").value);
+
+            let costoPaginas = (numPaginas - 3) * 500;
+            let total = tipoSitio + diseno + pagos + seo + mantenimiento + (costoPaginas > 0 ? costoPaginas : 0);
+
+            document.getElementById("total").textContent = `$${total.toLocaleString()} MXN`;
+        }
+
+        document.querySelectorAll("select, input").forEach(elemento => {
+            elemento.addEventListener("change", calcularCotizacion);
+        });
+
+        calcularCotizacion();
+    </script>
+</body>
+</html>

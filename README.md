@@ -1,34 +1,40 @@
-# Cotizador Pro – Plugin WordPress
+# Cotizador Pro WordPress Plugin
 
-Cotizador profesional y personalizable para WordPress. Permite a tus clientes generar cotizaciones de servicios, recibirlas en PDF por correo, y gestiona un historial completo desde el panel de administración. Incluye generación automática de PDF, envío por email, historial descargable y diseño moderno adaptable a tus servicios.
+Cotizador Pro es un plugin para WordPress que permite a los usuarios generar cotizaciones personalizadas de servicios, enviarlas por correo electrónico (con archivo HTML adjunto), y gestionarlas desde el panel de administración.
 
-## Características principales
-- Formulario web personalizable para datos del cliente y servicios.
-- Cálculo automático del total.
-- Generación de PDF profesional y envío por correo.
-- Historial de cotizaciones en el admin, con opción de descarga de PDF.
-- Plantilla visual y opción de impresión para el cliente.
-- Panel de administración para personalizar servicios, precios y etiquetas.
-- Código moderno, seguro y adaptable.
+## 🚀 Despliegue Rápido
 
-## Instalación
-1. Sube la carpeta `cotizador` al directorio `/wp-content/plugins/` en tu instalación de WordPress.
-2. Activa el plugin desde el panel de administración de WordPress.
-3. Usa el shortcode `[cotizador_pro]` en cualquier página para mostrar el formulario.
+1. **Clona el repositorio o sube los archivos a tu instalación de WordPress:**
+   - Carpeta recomendada: `wp-content/plugins/cotizador`
 
-## Uso
-- Personaliza los servicios y precios desde el panel "Cotizador Pro" en el admin de WordPress.
-- Los clientes pueden enviar cotizaciones y recibirán un PDF profesional.
-- El administrador puede ver el historial de cotizaciones y descargar los PDFs generados.
+2. **Activa el plugin desde el panel de administración de WordPress.**
 
-## Estructura del proyecto
-- `cotizador/`: Código principal del plugin.
-- `cotizador/assets/`: CSS y JS del formulario.
-- `plantilla-cotizacion.html`: Plantilla visual para impresión y PDF.
-- `PLAN_PROYECTO.md`: Documentación y plan de trabajo.
+3. **Configura los campos desde el panel de opciones del plugin (si aplica).**
 
-## Contribuciones
-¡Pull requests y sugerencias son bienvenidas! Por favor, abre un issue para discutir cambios importantes antes de hacer un PR.
+4. **Agrega el shortcode** `[cotizador_pro]` **en la página o entrada donde quieras mostrar el formulario.**
 
-## Licencia
-[MIT](LICENSE)
+5. **¡Listo! Los usuarios podrán generar y enviar cotizaciones, y recibirán un archivo HTML adjunto y opción de imprimir/exportar.**
+
+---
+
+## 📝 Requisitos
+- WordPress 5.8 o superior
+- PHP 7.4 o superior
+- Acceso a la carpeta de uploads para guardar archivos HTML
+
+## 🛠️ Funcionalidades principales
+- Generación de cotización en HTML (adjunto y para impresión/exportación)
+- Envío de todos los datos del formulario por correo al admin y al cliente
+- Historial de cotizaciones y descarga de archivos
+- Seguridad: validación y sanitización de datos, endpoints protegidos
+
+## 📄 Documentación adicional
+- Consulta el archivo `PLAN_PROYECTO.md` para detalles de fases, tareas y recomendaciones
+- Cambios y versiones: ver `CHANGELOG.md`
+
+## 👨‍💻 Autor
+Eden Mendez
+
+---
+
+¿Dudas o sugerencias? Abre un issue en el repositorio o contacta al desarrollador.

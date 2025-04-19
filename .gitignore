@@ -1,0 +1,13 @@
+# Archivos y carpetas a ignorar por Git
+.DS_Store
+*.log
+node_modules/
+vendor/
+wp-content/uploads/
+wp-content/cache/
+wp-content/upgrade/
+.env
+.idea/
+*.zip
+*.bak
+*.tmp

@@ -33,20 +33,20 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('sendQuote').addEventListener('click', function(e) {
         e.preventDefault();
         const data = {
-    nombre: document.getElementById('clientName').value,
-    correo: document.getElementById('clientEmail').value,
-    telefono: document.getElementById('clientPhone').value,
-    tipoSitio: document.getElementById('siteType').options[document.getElementById('siteType').selectedIndex].text,
-    precioTipoSitio: document.getElementById('siteType').value,
-    numPaginas: document.getElementById('numPages').value,
-    diseno: document.getElementById('design').options[document.getElementById('design').selectedIndex].text,
-    pagos: document.getElementById('payments').options[document.getElementById('payments').selectedIndex].text,
-    seo: document.getElementById('seo').options[document.getElementById('seo').selectedIndex].text,
-    mantenimiento: document.getElementById('maintenance').options[document.getElementById('maintenance').selectedIndex].text,
-    total: document.getElementById('totalAmount').textContent
-};
+            nombre: document.getElementById('clientName').value,
+            correo: document.getElementById('clientEmail').value,
+            telefono: document.getElementById('clientPhone').value,
+            tipoSitio: document.getElementById('siteType').options[document.getElementById('siteType').selectedIndex].text,
+            precioTipoSitio: document.getElementById('siteType').value,
+            numPaginas: document.getElementById('numPages').value,
+            diseno: document.getElementById('design').options[document.getElementById('design').selectedIndex].text,
+            pagos: document.getElementById('payments').options[document.getElementById('payments').selectedIndex].text,
+            seo: document.getElementById('seo').options[document.getElementById('seo').selectedIndex].text,
+            mantenimiento: document.getElementById('maintenance').options[document.getElementById('maintenance').selectedIndex].text,
+            total: document.getElementById('totalAmount').textContent
+        };
 
-        // Generar HTML de la cotización para PDF
+        // Generar HTML de la cotización para archivo adjunto
         let cotizacionHTML = `
 <div style='font-family: Arial, sans-serif; background: #fff; max-width: 700px; margin: auto; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 30px;'>
     <div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:35px;'>
@@ -81,58 +81,46 @@ document.addEventListener('DOMContentLoaded', function() {
     <div style='text-align:center; color:#888; font-size:0.95em; margin-top:30px;'>Gracias por confiar en nuestros servicios. La cotización es válida por 15 días.<br>Términos y Condiciones: <br> El proyecto comienza con un anticipo del 70% y el saldo se paga antes de la entrega final. Los tiempos de entrega dependen de la entrega puntual de materiales por parte del cliente. Se incluyen dos rondas de revisiones; adicionales se facturarán por separado. El cliente es responsable de cubrir los costos de licencias de terceros. Toda la información proporcionada será tratada de manera confidencial. El soporte y mantenimiento no están incluidos, pero pueden contratarse por separado. Las cancelaciones a mitad del proyecto retendrán el anticipo como compensación.</div>
 </div>`;
 
-        // Generar PDF usando jsPDF + html2canvas
-        if (window.jspdf && window.html2canvas) {
-            // Guardar datos en sessionStorage y abrir la plantilla visual para el cliente
-            sessionStorage.setItem('datosCotizacion', JSON.stringify(data));
-            window.open('/plantilla-cotizador/', '_blank');
-
-            // Generar PDF oculto y enviarlo al backend
-            const jsPDF = window.jspdf.jsPDF;
-            const tempDiv = document.createElement('div');
-            tempDiv.style.position = 'fixed';
-            tempDiv.style.left = '-9999px';
-            tempDiv.innerHTML = cotizacionHTML;
-            document.body.appendChild(tempDiv);
-            window.html2canvas(tempDiv, {scale:2}).then(function(canvas) {
-                const imgData = canvas.toDataURL('image/png');
-                const pdf = new jsPDF('p', 'pt', 'a4');
-                const pageWidth = pdf.internal.pageSize.getWidth();
-                const pageHeight = pdf.internal.pageSize.getHeight();
-                const imgProps = pdf.getImageProperties(imgData);
-                let pdfWidth = pageWidth - 40;
-                let pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-                if (pdfHeight > pageHeight - 40) {
-                    pdfHeight = pageHeight - 40;
-                    pdfWidth = (imgProps.width * pdfHeight) / imgProps.height;
-                }
-                pdf.addImage(imgData, 'PNG', 20, 20, pdfWidth, pdfHeight);
-                document.body.removeChild(tempDiv);
-                // Enviar PDF al backend en base64
-                const pdfBase64 = pdf.output('datauristring').split(',')[1];
-                const endpoint = 'https://edenmendez.com/wp-json/cotizador/v1/enviar';
-                fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        ...data,
-                        pdf: pdfBase64
-                    })
-                })
-                .then(res => res.json())
-                .then(res => {
-                    if(res.success){
-                        alert('Cotización enviada correctamente.');
-                    }else{
-                        alert('Hubo un problema al enviar la cotización.');
-                    }
-                })
-                .catch(()=>{
-                    alert('Error de conexión al enviar la cotización.');
-                });
-            });
-        } else {
-            document.getElementById('cotizador-mensaje').textContent = 'No se pudo cargar la librería para generar PDF.';
-        }
+        // ----- PRUEBA: ENVÍO SIN PDF -----
+        fetch('/wp-json/cotizador/v1/guardar/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...data,
+                archivo_html: cotizacionHTML
+            })
+        })
+        .then(r => r.json())
+        .then(resp => {
+            console.log("Respuesta API guardar:", resp);
+            if(resp.success){
+                document.getElementById('cotizador-mensaje').textContent = 'Cotización enviada correctamente.';
+                // Abrir ventana nueva con la cotización y permitir impresión
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`<!DOCTYPE html><html><head><title>Cotización</title><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>`);
+                printWindow.document.write('<style>body{background:#f0f4f8;}@media print{body{background:#fff;}}</style>');
+                printWindow.document.write(cotizacionHTML);
+                printWindow.document.write('</head><body></body></html>');
+                printWindow.document.close();
+                printWindow.focus();
+                setTimeout(() => { printWindow.print(); }, 600);
+                // Limpiar campos
+                document.getElementById('clientName').value = '';
+                document.getElementById('clientEmail').value = '';
+                document.getElementById('clientPhone').value = '';
+                document.getElementById('siteType').selectedIndex = 0;
+                document.getElementById('numPages').value = 3;
+                document.getElementById('design').selectedIndex = 0;
+                document.getElementById('payments').selectedIndex = 0;
+                document.getElementById('seo').selectedIndex = 0;
+                document.getElementById('maintenance').selectedIndex = 0;
+                calcularCotizacion();
+            }else{
+                document.getElementById('cotizador-mensaje').textContent = 'Hubo un problema al guardar la cotización.';
+            }
+        })
+        .catch(()=>{
+            document.getElementById('cotizador-mensaje').textContent = 'Error de conexión al guardar la cotización.';
+        });
     });
 });

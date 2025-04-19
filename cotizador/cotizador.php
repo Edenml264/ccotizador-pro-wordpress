@@ -54,6 +54,7 @@ add_action('admin_menu', function() {
 
 // Endpoint para guardar cotizaciones y ruta PDF + enviar emails
 add_action('rest_api_init', function() {
+    // Endpoint principal: guarda en historial y envía correos (admin y cliente)
     register_rest_route('cotizador/v1', '/guardar/', array(
         'methods' => 'POST',
         'permission_callback' => '__return_true',
@@ -63,12 +64,22 @@ add_action('rest_api_init', function() {
 
             $tabla = $wpdb->prefix . 'cotizaciones';
 
+            // Crear archivo HTML de la cotización si existe el campo
+            $html_url = '';
+            if (!empty($params['archivo_html'])) {
+                $upload_dir = wp_upload_dir();
+                $filename = 'cotizacion_' . time() . '_' . uniqid() . '.html';
+                $file_path = $upload_dir['path'] . '/' . $filename;
+                file_put_contents($file_path, $params['archivo_html']);
+                $html_url = $upload_dir['url'] . '/' . $filename;
+            }
+            $pdf_url = isset($params['archivo']) ? esc_url_raw($params['archivo']) : '';
             $wpdb->insert($tabla, array(
                 'fecha' => current_time('mysql'),
                 'cliente' => sanitize_text_field($params['nombre']),
                 'email' => sanitize_email($params['correo']),
                 'monto' => sanitize_text_field($params['total']),
-                'archivo' => ''
+                'archivo' => $html_url ? $html_url : $pdf_url
             ));
 
             // Preparar datos para email
@@ -88,11 +99,28 @@ add_action('rest_api_init', function() {
             $mail_admin = get_option('cotizador_mail_admin', get_option('admin_email'));
             $asunto_admin = strtr(get_option('cotizador_asunto_admin', 'Nueva cotización recibida'), $vars);
             $asunto_cliente = strtr(get_option('cotizador_asunto_cliente', 'Tu cotización personalizada'), $vars);
-            $cuerpo_admin = strtr(get_option('cotizador_cuerpo_admin', 'Has recibido una nueva cotización. Ver detalles adjuntos.'), $vars);
+            // Generar tabla HTML con los datos del formulario para el cuerpo del correo admin
+            $tabla_campos = '<table style="border-collapse:collapse;max-width:480px;width:100%;margin:22px 0 18px 0;font-size:1.08em;">';
+            $tabla_campos .= '<tr><td style="font-weight:bold;padding:6px 10px;border:1px solid #ddd;background:#f0f4f8;">Nombre</td><td style="padding:6px 10px;border:1px solid #ddd;">' . esc_html($params['nombre']) . '</td></tr>';
+            $tabla_campos .= '<tr><td style="font-weight:bold;padding:6px 10px;border:1px solid #ddd;background:#f0f4f8;">Correo</td><td style="padding:6px 10px;border:1px solid #ddd;">' . esc_html($params['correo']) . '</td></tr>';
+            $tabla_campos .= '<tr><td style="font-weight:bold;padding:6px 10px;border:1px solid #ddd;background:#f0f4f8;">Teléfono</td><td style="padding:6px 10px;border:1px solid #ddd;">' . esc_html($params['telefono']) . '</td></tr>';
+            $tabla_campos .= '<tr><td style="font-weight:bold;padding:6px 10px;border:1px solid #ddd;background:#f0f4f8;">Tipo de Sitio</td><td style="padding:6px 10px;border:1px solid #ddd;">' . esc_html($params['tipoSitio']) . '</td></tr>';
+            $tabla_campos .= '<tr><td style="font-weight:bold;padding:6px 10px;border:1px solid #ddd;background:#f0f4f8;">Precio Tipo Sitio</td><td style="padding:6px 10px;border:1px solid #ddd;">' . esc_html($params['precioTipoSitio']) . '</td></tr>';
+            $tabla_campos .= '<tr><td style="font-weight:bold;padding:6px 10px;border:1px solid #ddd;background:#f0f4f8;">Número de páginas</td><td style="padding:6px 10px;border:1px solid #ddd;">' . esc_html($params['numPaginas']) . '</td></tr>';
+            $tabla_campos .= '<tr><td style="font-weight:bold;padding:6px 10px;border:1px solid #ddd;background:#f0f4f8;">Diseño</td><td style="padding:6px 10px;border:1px solid #ddd;">' . esc_html($params['diseno']) . '</td></tr>';
+            $tabla_campos .= '<tr><td style="font-weight:bold;padding:6px 10px;border:1px solid #ddd;background:#f0f4f8;">Pagos en línea</td><td style="padding:6px 10px;border:1px solid #ddd;">' . esc_html($params['pagos']) . '</td></tr>';
+            $tabla_campos .= '<tr><td style="font-weight:bold;padding:6px 10px;border:1px solid #ddd;background:#f0f4f8;">SEO</td><td style="padding:6px 10px;border:1px solid #ddd;">' . esc_html($params['seo']) . '</td></tr>';
+            $tabla_campos .= '<tr><td style="font-weight:bold;padding:6px 10px;border:1px solid #ddd;background:#f0f4f8;">Mantenimiento</td><td style="padding:6px 10px;border:1px solid #ddd;">' . esc_html($params['mantenimiento']) . '</td></tr>';
+            $tabla_campos .= '<tr><td style="font-weight:bold;padding:6px 10px;border:1px solid #ddd;background:#f0f4f8;">Total</td><td style="padding:6px 10px;border:1px solid #ddd;">' . esc_html($params['total']) . '</td></tr>';
+            $tabla_campos .= '</table>';
+            $cuerpo_admin = strtr(get_option('cotizador_cuerpo_admin', 'Has recibido una nueva cotización. Ver detalles adjuntos.'), $vars) . $tabla_campos;
             $cuerpo_cliente = strtr(get_option('cotizador_cuerpo_cliente', '¡Gracias por tu interés! Te enviamos tu cotización personalizada adjunta.'), $vars);
             // Enviar al admin
             $headers = array('Content-Type: text/html; charset=UTF-8');
-            $attachments = $data['archivo'] ? array( cotizador_url_to_path($data['archivo']) ) : array();
+            $attachments = array();
+            if ($html_url) {
+                $attachments[] = cotizador_url_to_path($html_url);
+            }
             wp_mail($mail_admin, $asunto_admin, $cuerpo_admin . '<br><br>' . $plantilla_html, $headers, $attachments);
             // Enviar al cliente
             if (is_email($data['email'])) {
@@ -100,6 +128,41 @@ add_action('rest_api_init', function() {
             }
             return array('success' => true);
         }
+    ));
+    // Endpoint secundario: solo envía correo, sin guardar en historial (opcional, útil para pruebas)
+    register_rest_route('cotizador/v1', '/enviar', array(
+        'methods' => 'POST',
+        'callback' => function($request) {
+            $params = $request->get_json_params();
+            $to = get_option('cotizador_mail_admin', get_option('admin_email'));
+            $subject = 'Nueva cotización desde el Cotizador Web';
+            $message = "Nombre: {$params['nombre']}\n";
+            $message .= "Correo: {$params['correo']}\n";
+            $message .= "Teléfono: {$params['telefono']}\n";
+            $message .= "Tipo de Sitio: {$params['tipoSitio']}\n";
+            $message .= "Número de páginas: {$params['numPaginas']}\n";
+            $message .= "Diseño personalizado: {$params['diseno']}\n";
+            $message .= "Pagos en línea: {$params['pagos']}\n";
+            $message .= "SEO: {$params['seo']}\n";
+            $message .= "Mantenimiento: {$params['mantenimiento']}\n";
+            $message .= "Total: {$params['total']}\n";
+            $attachments = array();
+            if (!empty($params['pdf'])) {
+                $pdf_data = base64_decode($params['pdf']);
+                $tmp_pdf = tempnam(sys_get_temp_dir(), 'cotizacion_') . '.pdf';
+                file_put_contents($tmp_pdf, $pdf_data);
+                $attachments[] = $tmp_pdf;
+            }
+            $headers = array('Content-Type: text/plain; charset=UTF-8');
+            $sent = wp_mail($to, $subject, $message, $headers, $attachments);
+            if (!empty($attachments)) {
+                foreach ($attachments as $file) {
+                    @unlink($file);
+                }
+            }
+            return array('success' => $sent ? true : false);
+        },
+        'permission_callback' => '__return_true'
     ));
 });
 
@@ -163,11 +226,14 @@ function cotizador_historial_page() {
                         echo '<td>' . esc_html($cot->cliente) . '</td>';
                         echo '<td>' . esc_html($cot->email) . '</td>';
                         echo '<td>' . esc_html($cot->monto) . '</td>';
+                        echo '<td>';
                         if ($cot->archivo) {
-                            echo '<td><a href="' . esc_url($cot->archivo) . '" class="button" download>Descargar PDF</a></td>';
+                            echo '<a href="' . esc_url($cot->archivo) . '" class="button button-primary" download style="margin-right:5px;">Descargar PDF</a>';
                         } else {
-                            echo '<td><span style="color:#888">No disponible</span></td>';
+                            echo '<span style="color:#888; margin-right:5px;">No disponible</span>';
                         }
+                        echo '<button class="button button-secondary ver-detalles-cotizacion" data-cotizacion="' . esc_attr(json_encode($cot)) . '">Ver Detalles</button>';
+                        echo '</td>';
                         echo '</tr>';
                     }
                 } else {
@@ -176,6 +242,32 @@ function cotizador_historial_page() {
                 ?>
             </tbody>
         </table>
+        <div id="modal-detalles-cotizacion" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);z-index:10000;align-items:center;justify-content:center;">
+            <div style="background:#fff;padding:30px 40px;border-radius:10px;max-width:500px;width:90%;position:relative;">
+                <button id="cerrar-modal-cotizacion" style="position:absolute;top:10px;right:10px;" class="button">Cerrar</button>
+                <div id="contenido-modal-cotizacion"></div>
+            </div>
+        </div>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.ver-detalles-cotizacion').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    let cot = JSON.parse(this.getAttribute('data-cotizacion'));
+                    let html = `<h2>Detalles de Cotización</h2>` +
+                        `<p><strong>Fecha:</strong> ${cot.fecha}</p>` +
+                        `<p><strong>Cliente:</strong> ${cot.cliente}</p>` +
+                        `<p><strong>Email:</strong> ${cot.email}</p>` +
+                        `<p><strong>Monto:</strong> ${cot.monto}</p>` +
+                        (cot.archivo ? `<p><strong>PDF:</strong> <a href='${cot.archivo}' target='_blank'>Descargar</a></p>` : `<p><strong>PDF:</strong> No disponible</p>`);
+                    document.getElementById('contenido-modal-cotizacion').innerHTML = html;
+                    document.getElementById('modal-detalles-cotizacion').style.display = 'flex';
+                });
+            });
+            document.getElementById('cerrar-modal-cotizacion').addEventListener('click', function() {
+                document.getElementById('modal-detalles-cotizacion').style.display = 'none';
+            });
+        });
+        </script>
     </div>
     <?php
 }
